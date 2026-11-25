@@ -13,3 +13,6 @@
 .backup-actions button:hover,.backup-import:hover{background:#edf3e9}
 .backup-import input{display:none}
 @media(max-width:560px){.backup-panel{align-items:flex-start}.backup-actions{width:100%}.backup-actions button,.backup-import{flex:1}}
+.install-button{display:inline-flex;align-items:center;gap:7px;padding:9px 13px;border:1px solid #dce6d8;border-radius:999px;background:#f3f7ef;color:#49664c;font:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:background .2s,transform .2s}
+.install-button:hover{background:#e8f0e3;transform:translateY(-1px)}
+@media(max-width:560px){.install-button{padding:8px 10px;font-size:10px}}
