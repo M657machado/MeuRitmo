@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Activity, ArrowRight, BookHeart, Check, CheckCircle2, ChevronLeft, ChevronRight, Circle, Crown, Flame, Heart, Leaf, LockKeyhole, Menu, Plus, Share2, Sparkles, Sun, Target, Trash2, Trophy, X } from 'lucide-react'
+import { Activity, ArrowRight, BookHeart, Check, CheckCircle2, Crown, Flame, Heart, Leaf, LockKeyhole, Menu, Plus, Share2, Sparkles, Sun, Target, Trash2, Trophy, X } from 'lucide-react'
 
 type Step = { id: string; title: string; done: boolean }
 type Day = { mood: string; energy: number; priority: string; steps: Step[]; note: string; updatedAt: string }
