@@ -11,6 +11,7 @@ Um espaço pessoal para organizar o dia com gentileza: check-in de humor, uma pr
 - Compartilhamento do resumo diário.
 - Exportação e restauração de backup em JSON.
 - Interface responsiva para computador e celular.
+- Estrutura PWA instalável, com manifesto, ícone próprio e cache básico para acesso offline após a primeira visita.
 
 ## Tecnologias
 
