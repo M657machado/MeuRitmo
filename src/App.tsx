@@ -4,6 +4,7 @@ import { Activity, ArrowRight, BookHeart, Check, CheckCircle2, Crown, Download, 
 type Step = { id: string; title: string; done: boolean }
 type Day = { mood: string; energy: number; priority: string; steps: Step[]; note: string; updatedAt: string }
 type Store = Record<string, Day>
+type InstallPromptEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> }
 const KEY = 'meuritmo.v1'
 const todayKey = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') }
 const emptyDay = (): Day => ({ mood: '', energy: 3, priority: '', steps: [], note: '', updatedAt: new Date().toISOString() })
@@ -20,13 +21,27 @@ export default function App() {
   const [newStep, setNewStep] = useState('')
   const [toast, setToast] = useState('')
   const [mobileMenu, setMobileMenu] = useState(false)
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null)
   const today = todayKey()
   const day = store[today] || emptyDay()
   const completed = day.steps.filter(s => s.done).length
   const progress = day.steps.length ? Math.round(completed / day.steps.length * 100) : 0
-  const streak = useMemo(() => { let count = 0; const d = new Date(); for (let i=0;i<30;i++) { const k = new Date(d.getFullYear(),d.getMonth(),d.getDate()-i).toLocaleDateString('en-CA'); const v=store[k]; if (v && (v.mood || v.priority || v.steps.some(s=>s.done) || v.note)) count++; else if (i>0) break } return count }, [store])
+  const streak = useMemo(() => { let count = 0; const d = new Date(); for (let i=0;i<30;i++) { const k = (() => { const x = new Date(d.getFullYear(),d.getMonth(),d.getDate()-i); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0') })(); const v=store[k]; if (v && (v.mood || v.priority || v.steps.some(s=>s.done) || v.note)) count++; else if (i>0) break } return count }, [store])
   const update = (patch: Partial<Day>) => setStore(prev => ({ ...prev, [today]: { ...(prev[today] || emptyDay()), ...patch, updatedAt: new Date().toISOString() } }))
   useEffect(() => { localStorage.setItem(KEY, JSON.stringify(store)) }, [store])
+  useEffect(() => {
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => undefined)
+    const handleInstall = (event: Event) => { event.preventDefault(); setInstallPrompt(event as InstallPromptEvent) }
+    window.addEventListener('beforeinstallprompt', handleInstall)
+    return () => window.removeEventListener('beforeinstallprompt', handleInstall)
+  }, [])
+  const installApp = async () => {
+    if (!installPrompt) return
+    await installPrompt.prompt()
+    const choice = await installPrompt.userChoice
+    if (choice.outcome === 'accepted') setToast('MeuRitmo foi adicionado ao seu dispositivo!')
+    setInstallPrompt(null)
+  }
   useEffect(() => { if (!toast) return; const t = window.setTimeout(() => setToast(''), 2600); return () => window.clearTimeout(t) }, [toast])
   const addStep = () => { const title = newStep.trim(); if (!title) return; update({ steps: [...day.steps, { id: crypto.randomUUID(), title, done: false }] }); setNewStep('') }
   const toggleStep = (id: string) => update({ steps: day.steps.map(s => s.id === id ? { ...s, done: !s.done } : s) })
@@ -72,7 +87,7 @@ export default function App() {
       <div className="sidebar-bottom"><div className="quote-card"><div className="quote-icon"><Heart size={16}/></div><p>“Você não precisa dar conta de tudo. Só precisa começar por algum lugar.”</p><span>UM LEMBRETE GENTIL</span></div><div className="profile"><div className="avatar">🌱</div><div><strong>Meu cantinho</strong><small>Seu espaço pessoal</small></div><button className="icon-button" title="Menu"><Menu size={17}/></button></div></div>
     </aside>
     <main className="main-area">
-      <header className="topbar"><button className="mobile-brand" onClick={()=>setMobileMenu(!mobileMenu)}><Leaf size={20}/> meu ritmo</button><div className="breadcrumb">Meu espaço <span>/</span> <b>{active}</b></div><div className="top-actions"><div className="streak-pill"><Flame size={16}/><b>{streak}</b><span>{streak===1?'dia':'dias'} de presença</span></div><button className="upgrade-button" onClick={()=>setToast('Novidades do plano premium em breve!')}><Crown size={15}/> Seja premium</button></div></header>
+      <header className="topbar"><button className="mobile-brand" onClick={()=>setMobileMenu(!mobileMenu)}><Leaf size={20}/> meu ritmo</button><div className="breadcrumb">Meu espaço <span>/</span> <b>{active}</b></div><div className="top-actions">{installPrompt&&<button className="install-button" onClick={installApp}><Download size={15}/> Instalar app</button>}<div className="streak-pill"><Flame size={16}/><b>{streak}</b><span>{streak===1?'dia':'dias'} de presença</span></div><button className="upgrade-button" onClick={()=>setToast('Novidades do plano premium em breve!')}><Crown size={15}/> Seja premium</button></div></header>
       <div className="content">
         {active==='Hoje' && <><section className="welcome-row"><div><div className="eyebrow"><span className="eyebrow-line"/> {dateLabel}</div><h1>{greeting()}, que bom<br/>ter você <em>por aqui.</em></h1><p className="welcome-sub">Respire. Este é o seu espaço. Vamos cuidar de hoje, sem pressa?</p></div><div className="sun-art"><div className="sun-halo"/><div className="sun-face">☀️</div><span className="spark spark-one">✳</span><span className="spark spark-two">✦</span><span className="art-leaf">〰</span></div></section>
         <section className="dashboard-grid">
