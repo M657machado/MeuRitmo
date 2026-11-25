@@ -9,7 +9,7 @@
 .backup-panel p{margin:5px 0 0;color:#788176;font-size:12px;line-height:1.5}
 .backup-panel small{flex-basis:100%;color:#8b9188;font-size:10px;line-height:1.5}
 .backup-actions{display:flex;gap:9px;flex-wrap:wrap}
-.backup-actions button,.backup-import{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 13px;border:1px solid #dce4d7;border-radius:10px;background:#fff;color:#45614a;font:600 11px inherit;cursor:pointer}
+.backup-actions button,.backup-import{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 13px;border:1px solid #dce4d7;border-radius:10px;background:#fff;color:#45614a;font:inherit;font-size:11px;font-weight:600;cursor:pointer}
 .backup-actions button:hover,.backup-import:hover{background:#edf3e9}
 .backup-import input{display:none}
 @media(max-width:560px){.backup-panel{align-items:flex-start}.backup-actions{width:100%}.backup-actions button,.backup-import{flex:1}}
